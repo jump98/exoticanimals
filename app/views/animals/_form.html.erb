@@ -1,0 +1,40 @@
+<%= form_for animal do |f| %>
+<%= render 'shared/error_messages' %>
+
+    <%= f.hidden_field :user_id %>
+    <div class="form-group">
+        <%= f.label :image, '*メイン写真' %>
+        <%= f.file_field :image, class: 'form-control' %>
+    </div>
+     <div class="form-group">
+        <%= f.label :image2, 'サブ写真1' %>
+        <%= f.file_field :image2, class: 'form-control' %>
+    </div>
+     <div class="form-group">
+        <%= f.label :image3, 'サブ写真2' %>
+        <%= f.file_field :image3, class: 'form-control' %>
+    </div>
+    <div class="form-group">
+        <%= f.label :species, '*種類' %>
+        <%= f.text_field :species, class: 'form-control' %>
+    </div>
+    <div class="form-group">
+        <%= f.label :sex, '*性別: ' %>
+        <%= f.radio_button :sex, "オス" %>オス
+        <%= f.radio_button :sex, "メス" %>メス
+        <%= f.radio_button :sex, "性別不明" %>性別不明
+    </div>
+    <div class="form-group">
+        <%= f.label :color, '*カラー' %>
+        <%= f.text_field :color, class: 'form-control' %>
+    </div>
+    <div class="form-group">
+        <%= f.label :price, '販売価格' %>(円) *価格を入力しなければ「￥ASK」と表示されます。
+        <%= f.text_field :price, class: 'form-control' %>
+    </div>
+    <div class="form-group">
+        <%= f.label :body, '*PR文' %>
+        <%= f.text_area :body, class: 'form-control', rows: 10 %>
+    </div>
+<%= f.submit '保存', class: 'btn btn-primary' %>
+<% end %>

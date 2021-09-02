@@ -1,0 +1,19 @@
+ja:
+  activerecord:
+    attributes:
+      animal:
+        image: メイン写真
+        species: 種類
+        sex: 性別
+        body: PR文
+        color: カラー
+      user:
+        name: ユーザー名
+        email: Email
+        password: パスワード
+        password_confirmation: 確認用パスワード
+      comment:
+        comment: コメント
+  errors:
+    messages:
+      max_size_error: ファイルサイズは5MB以下にしてください。

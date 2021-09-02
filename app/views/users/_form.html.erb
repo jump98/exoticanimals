@@ -1,0 +1,39 @@
+<%= form_with model: @user, local: true do |f| %>
+<%= render 'shared/error_messages' %>
+
+
+  <% if @user.errors.any? %>
+    <div id="error_explanation">
+      <div class="alert alert-danger">
+        エラーが <%= pluralize(@user.errors.count, "つ") %>あります。
+      </div>
+      <ul>
+        <% @user.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+
+
+  
+  <div class="form-group">
+    <%= f.label :name, 'ユーザー名' %>
+    <%= f.text_field :name, class: 'form-control' %>
+  </div>
+  <div class="form-group">
+    <%= f.label :email, 'email' %>
+    <%= f.text_field :email, class: 'form-control' %>
+  </div>
+  <div class="form-group">
+    <%= f.label :password, 'パスワード' %>
+    <%= f.password_field :password, class: 'form-control' %>
+  </div>
+  <div class="form-group">
+    <%= f.label :password_confirmation, 'パスワード（確認）' %>
+    <%= f.password_field :password_confirmation, class: 'form-control' %>
+  </div>
+
+  <%= f.submit '作成', class: 'btn btn-primary' %>
+<% end %>

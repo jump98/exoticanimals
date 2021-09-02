@@ -1,0 +1,16 @@
+<p><%= @user.name %>様,</p>
+
+<p>
+みんなのエキゾチックアニマルにご登録申請をいただき、ありがとうございます。<br><br>
+
+下記のメール確認ボタンをクリックして、登録完了をお願いいたします。<br>
+<%= link_to "登録を完了する", edit_account_activation_url(@user.activation_token, email: @user.email) %>
+
+</p>
+
+<br>
+<br>
+--------------------------------------------------------<br>
+◆運営: みんなのエキゾチックブリーダーズ<br>
+(C)2021 Onocy Inc. All Rights Reserved.
+

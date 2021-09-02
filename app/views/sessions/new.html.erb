@@ -1,0 +1,23 @@
+<h1>マイページログイン</h1>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+    <%= form_for(:session, url: login_path) do |f| %>
+      
+      <%= f.label :email %>
+      <%= f.email_field :email, class: 'form-control' %>
+
+      <%= f.label :パスワード %>
+      <%= f.password_field :password, class: 'form-control' %>
+
+      <%= f.label :remember_me, class: "checkbox inline pt-3" do %>
+        <%= f.check_box :remember_me %>
+        <span>ログイン情報をコンピューターに保存する。</span>
+      <% end %>
+
+      <%= f.submit "ログイン", class: "btn btn-primary" %>
+    <% end %>
+
+    <p>まだ登録がお済みでない方はこちら→ <%= link_to "新規会員登録をする！", new_user_path %></p>
+  </div>
+</div>

@@ -1,0 +1,121 @@
+# Query: webapp
+# ContextLines: 1
+
+93 results - 10 files
+
+docker-compose.yml:
+  22      volumes:
+  23:       - .:/exoticanimals
+  24:       - public-data:/exoticanimals/public
+  25:       - tmp-data:/exoticanimals/tmp
+  26:       - log-data:/exoticanimals/log
+  27      depends_on:
+
+  44      volumes:
+  45:       - public-data:/exoticanimals/public
+  46:       - tmp-data:/exoticanimals/tmp
+  47        - ./log/nginx:/var/log/nginx
+
+Dockerfile:
+   7  
+   8: # ルート直下にwebappという名前で作業ディレクトリを作成（コンテナ内のアプリケーションディレクトリ）
+   9: RUN mkdir /exoticanimals
+  10: WORKDIR /exoticanimals
+  11  
+  12  # ホストのGemfileとGemfile.lockをコンテナにコピー
+  13: ADD Gemfile /exoticanimals/Gemfile
+  14: ADD Gemfile.lock /exoticanimals/Gemfile.lock
+  15  
+
+  19  # ホストのアプリケーションディレクトリ内をすべてコンテナにコピー
+  20: ADD . /exoticanimals
+  21  
+
+package.json:
+  1  {
+  2:   "name": "exoticanimals",
+  3    "private": true,
+
+config/application.rb:
+  8  
+  9: module exoticanimals
+  10    class Application < Rails::Application
+
+config/cable.yml:
+   9    url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
+  10:   channel_prefix: exoticanimals_production
+
+config/database.yml:
+  52    database: exoticanimals_production
+  53:   username: exoticanimals
+  54:   password: <%= ENV['EXOTICANIMALS_DATABASE_PASSWORD'] %>
+  55  
+
+config/environments/production.rb:
+  63    # config.active_job.queue_adapter     = :resque
+  64:   # config.active_job.queue_name_prefix = "EXOTICANIMALS_#{Rails.env}"
+  65  
+
+containers/nginx/Dockerfile:
+  6  # Nginxの設定ファイルをコンテナにコピー
+  7: ADD nginx.conf /etc/nginx/conf.d/EXOTICANIMALS.conf
+  8  
+
+containers/nginx/nginx.conf:
+   2  # Nginxが受け取ったリクエストをバックエンドのpumaに送信
+   3: upstream exoticanimals {
+   4    # ソケット通信したいのでpuma.sockを指定
+   5:   server unix:///exoticanimals/tmp/sockets/puma.sock;
+   6  }
+
+  16    # ドキュメントルートの指定
+  17:   root /exoticanimals/public;
+  18  
+
+  21    error_page 505 502 503 504 /500.html;
+  22:   try_files  $uri/index.html $uri @exoticanimals;
+  23    keepalive_timeout 5;
+
+  25    # リバースプロキシ関連の設定
+  26:   location @exoticanimals {
+  27      proxy_set_header X-Real-IP $remote_addr;
+
+  29      proxy_set_header Host $http_host;
+  30:     proxy_pass http://exoticanimals;
+  31    }
+
+log/nginx/error.log:
+   1: 2021/07/11 08:01:25 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+   2: 2021/07/11 08:01:25 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+   3: 2021/07/11 08:01:26 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+   4: 2021/07/11 08:01:26 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+   5: 2021/07/11 08:01:26 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+   6: 2021/07/11 08:01:26 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+   7: 2021/07/11 08:01:27 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+   8: 2021/07/11 08:01:27 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+   9: 2021/07/11 08:01:27 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  10: 2021/07/11 08:01:27 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  11: 2021/07/11 08:01:28 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  12: 2021/07/11 08:01:28 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  13: 2021/07/11 08:01:28 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  14: 2021/07/11 08:01:28 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  15: 2021/07/11 08:01:28 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  16: 2021/07/11 08:01:28 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  17: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  18: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  19: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  20: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  21: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  22: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  23: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  24: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  25: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  26: 2021/07/11 08:01:29 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  27: 2021/07/11 08:01:30 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  28: 2021/07/11 08:01:30 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  29: 2021/07/11 08:01:30 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000", referrer: "http://localhost:8000/"
+  30: 2021/07/11 08:01:30 [error] 8#8: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (111: Connection refused) while connecting to upstream, client: 172.21.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000", referrer: "http://localhost:8000/"
+  31: 2021/07/11 08:19:14 [crit] 9#9: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (2: No such file or directory) while connecting to upstream, client: 172.22.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000"
+  32: 2021/07/11 08:19:14 [crit] 9#9: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (2: No such file or directory) while connecting to upstream, client: 172.22.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000"
+  33: 2021/07/11 08:19:17 [crit] 9#9: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (2: No such file or directory) while connecting to upstream, client: 172.22.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/", host: "localhost:8000"
+  34: 2021/07/11 08:19:17 [crit] 9#9: *1 connect() to unix:///webapp/tmp/sockets/puma.sock failed (2: No such file or directory) while connecting to upstream, client: 172.22.0.1, server: , request: "GET / HTTP/1.1", upstream: "http://unix:///webapp/tmp/sockets/puma.sock:/500.html", host: "localhost:8000"
